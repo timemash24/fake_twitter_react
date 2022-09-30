@@ -1,4 +1,4 @@
-### Cloning Twitter with React and Firebase
+## Cloning Twitter with React and Firebase
 
 ### Stack
 firebase 8.10.0
