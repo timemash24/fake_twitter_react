@@ -1,14 +1,14 @@
+import Tweet from 'components/Tweet';
 import { dbService } from 'fbase';
-import React, { useEffect, useState } from 'react';
 import {
   addDoc,
   collection,
-  getDoc,
-  getDocs,
   onSnapshot,
-  query,
   orderBy,
+  query,
 } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
+import { useRevalidator } from 'react-router-dom';
 
 const Home = ({ userObj }) => {
   const [tweet, setTweet] = useState('');
@@ -61,9 +61,11 @@ const Home = ({ userObj }) => {
       </form>
       <div>
         {tweets.map((twt) => (
-          <div key={twt.id}>
-            <h4>{twt.text}</h4>
-          </div>
+          <Tweet
+            key={twt.id}
+            tweetObj={twt}
+            isOwner={twt.creatorId === userObj.uid}
+          />
         ))}
       </div>
     </div>
