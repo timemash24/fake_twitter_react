@@ -10,8 +10,17 @@ const Tweet = ({ tweetObj, isOwner }) => {
   const onDeleteClick = async () => {
     const ok = window.confirm('Delete this tweet?');
     if (ok) {
-      await deleteDoc(doc(dbService, 'tweets', `${tweetObj.id}`));
-      await deleteObject(ref(storageService, tweetObj.attachmentURL));
+      try {
+        // 삭제하려는 트윗 firestore에서 삭제
+        await deleteDoc(doc(dbService, 'tweets', `${tweetObj.id}`));
+        // 삭제하려는 트윗에 이미지 파일 존재하는 경우
+        if (tweetObj.attachmentURL !== '') {
+          await deleteObject(ref(storageService, tweetObj.attachmentURL));
+        }
+      } catch (error) {
+        console.log(error);
+        window.alert('failed to delete the tweet!');
+      }
     }
   };
 
