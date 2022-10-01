@@ -23,7 +23,6 @@ function App() {
       ) : (
         'Initializing...'
       )}
-      <footer>&copy; fake-twitter {new Date().getFullYear()}</footer>
     </>
   );
 }
