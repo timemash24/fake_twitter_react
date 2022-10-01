@@ -19,9 +19,9 @@ const Profile = ({ refreshUser, userObj }) => {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    querySnapshot.forEach((doc) => {
-      console.log(doc.id, doc.data);
-    });
+    // querySnapshot.forEach((doc) => {
+    //   console.log(doc.id, doc.data);
+    // });
   };
 
   useEffect(() => {
