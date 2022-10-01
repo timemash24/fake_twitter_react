@@ -8,7 +8,6 @@ import {
   query,
 } from 'firebase/firestore';
 import { useEffect, useState } from 'react';
-import { useRevalidator } from 'react-router-dom';
 
 const Home = ({ userObj }) => {
   const [tweet, setTweet] = useState('');
