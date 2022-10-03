@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/fake_twitter_react/static/css/main.c172f452.css",
+    "main.js": "/fake_twitter_react/static/js/main.4afcc1b1.js",
+    "index.html": "/fake_twitter_react/index.html",
+    "main.c172f452.css.map": "/fake_twitter_react/static/css/main.c172f452.css.map",
+    "main.4afcc1b1.js.map": "/fake_twitter_react/static/js/main.4afcc1b1.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.c172f452.css",
+    "static/js/main.4afcc1b1.js"
+  ]
+}
