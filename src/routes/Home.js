@@ -1,16 +1,8 @@
-import { v4 as uuidv4 } from 'uuid';
 import Tweet from 'components/Tweet';
-import { dbService, storageService } from 'fbase';
-import {
-  addDoc,
-  collection,
-  onSnapshot,
-  orderBy,
-  query,
-} from 'firebase/firestore';
-import { useEffect, useState } from 'react';
-import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import TweetFactory from 'components/TweetFactory';
+import { dbService } from 'fbase';
+import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
+import { useEffect, useState } from 'react';
 
 const Home = ({ userObj }) => {
   const [tweets, setTweets] = useState([]);
@@ -32,9 +24,9 @@ const Home = ({ userObj }) => {
   }, []);
 
   return (
-    <div>
+    <div className="container">
       <TweetFactory userObj={userObj} />
-      <div>
+      <div style={{ marginTop: 30 }}>
         {tweets.map((twt) => (
           <Tweet
             key={twt.id}

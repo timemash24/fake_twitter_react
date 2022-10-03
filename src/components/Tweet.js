@@ -2,6 +2,8 @@ import { dbService, storageService } from 'fbase';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import React, { useState } from 'react';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
 
 const Tweet = ({ tweetObj, isOwner }) => {
   const [editing, setEditing] = useState(false);
@@ -11,6 +13,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
     const ok = window.confirm('Delete this tweet?');
     if (ok) {
       try {
+        console.log(tweetObj);
         // 삭제하려는 트윗 firestore에서 삭제
         await deleteDoc(doc(dbService, 'tweets', `${tweetObj.id}`));
         // 삭제하려는 트윗에 이미지 파일 존재하는 경우
@@ -42,43 +45,50 @@ const Tweet = ({ tweetObj, isOwner }) => {
   return (
     <div>
       {editing ? (
-        <>
+        <div className="tweet">
           {isOwner && (
             <>
               {
-                <form onSubmit={onSubmit}>
+                <form onSubmit={onSubmit} className="container tweetEdit">
                   <input
                     type="text"
                     placeholder="Edit your tweet"
                     value={newTweet}
                     onChange={onChange}
                     required
+                    autoFocus
+                    className="formInput"
                   />
-                  <input type="submit" value="Update tweet" />
+                  <input
+                    type="submit"
+                    value="Update tweet"
+                    className="formBtn"
+                  />
                 </form>
               }
             </>
           )}
-          <button onClick={toggleEditing}>Cancel</button>
-        </>
+          <span onClick={toggleEditing} className="formBtn cancelBtn">
+            Cancel
+          </span>
+        </div>
       ) : (
-        <>
+        <div className="tweet">
           <h4>{tweetObj.text}</h4>
           {tweetObj.attachmentURL && (
-            <img
-              alt={tweetObj.text}
-              src={tweetObj.attachmentURL}
-              width="50px"
-              height="50px"
-            />
+            <img alt={tweetObj.text} src={tweetObj.attachmentURL} />
           )}
           {isOwner && (
-            <>
-              <button onClick={onDeleteClick}>Delete</button>
-              <button onClick={toggleEditing}>Edit</button>
-            </>
+            <div className="tweet__actions">
+              <span onClick={onDeleteClick}>
+                <FontAwesomeIcon icon={faTrash} />
+              </span>
+              <span onClick={toggleEditing}>
+                <FontAwesomeIcon icon={faPencilAlt} />
+              </span>
+            </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
