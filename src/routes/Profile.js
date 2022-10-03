@@ -1,12 +1,15 @@
+import Tweet from 'components/Tweet';
 import { authService, dbService } from 'fbase';
 import { updateProfile } from 'firebase/auth';
 import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 const Profile = ({ refreshUser, userObj }) => {
   const navigate = useNavigate();
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+  const [myTweetObjs, setMyTweetObjs] = useState([]);
+
   const onLogOutClick = () => {
     authService.signOut();
     navigate('/');
@@ -19,9 +22,11 @@ const Profile = ({ refreshUser, userObj }) => {
       orderBy('createdAt', 'desc')
     );
     const querySnapshot = await getDocs(q);
-    // querySnapshot.forEach((doc) => {
-    //   console.log(doc.id, doc.data);
-    // });
+    const myTweets = [];
+    querySnapshot.forEach((doc) => {
+      myTweets.push(doc.data());
+    });
+    setMyTweetObjs([...myTweetObjs, ...myTweets]);
   };
 
   useEffect(() => {
@@ -44,19 +49,25 @@ const Profile = ({ refreshUser, userObj }) => {
       refreshUser();
     }
   };
+
   return (
-    <>
-      <form onSubmit={onSubmit}>
+    <div className="container">
+      <form onSubmit={onSubmit} className="profileForm">
         <input
           type="text"
           value={newDisplayName}
           placeholder="Display name"
           onChange={onChange}
+          autoFocus
+          className="formInput"
         />
         <input type="submit" value="Update Profile" />
       </form>
-      <button onClick={onLogOutClick}>Log Out</button>
-    </>
+      <span onClick={onLogOutClick}>Log Out</span>
+      {myTweetObjs.map((tweetObj) => (
+        <Tweet key={tweetObj.createdAt} tweetObj={tweetObj} isOwner={true} />
+      ))}
+    </div>
   );
 };
 
