@@ -1,7 +1,13 @@
 import Tweet from 'components/Tweet';
 import { authService, dbService } from 'fbase';
 import { updateProfile } from 'firebase/auth';
-import { collection, getDocs, orderBy, query, where } from 'firebase/firestore';
+import {
+  collection,
+  onSnapshot,
+  orderBy,
+  query,
+  where,
+} from 'firebase/firestore';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 
@@ -15,23 +21,26 @@ const Profile = ({ refreshUser, userObj }) => {
     navigate('/');
   };
 
-  const getMyTweets = async () => {
-    const q = query(
-      collection(dbService, 'tweets'),
-      where('creatorId', '==', userObj.uid),
-      orderBy('createdAt', 'desc')
-    );
-    const querySnapshot = await getDocs(q);
-    const myTweets = [];
-    querySnapshot.forEach((doc) => {
-      myTweets.push(doc.data());
-    });
-    setMyTweetObjs([...myTweetObjs, ...myTweets]);
-  };
-
   useEffect(() => {
+    const getMyTweets = async () => {
+      const q = query(
+        collection(dbService, 'tweets'),
+        where('creatorId', '==', userObj.uid),
+        orderBy('createdAt', 'desc')
+      );
+
+      // 실시간 업데이트
+      let tweetArr = [];
+      onSnapshot(q, (snapshot) => {
+        tweetArr = snapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
+        setMyTweetObjs(tweetArr);
+      });
+    };
     getMyTweets();
-  }, []);
+  }, [userObj]);
 
   const onChange = (e) => {
     const {
@@ -61,12 +70,24 @@ const Profile = ({ refreshUser, userObj }) => {
           autoFocus
           className="formInput"
         />
-        <input type="submit" value="Update Profile" />
+        <input
+          type="submit"
+          value="Update Profile"
+          className="formBtn"
+          style={{
+            marginTop: 10,
+          }}
+        />
       </form>
-      <span onClick={onLogOutClick}>Log Out</span>
-      {myTweetObjs.map((tweetObj) => (
-        <Tweet key={tweetObj.createdAt} tweetObj={tweetObj} isOwner={true} />
-      ))}
+      <span onClick={onLogOutClick} className="formBtn cancelBtn logOut">
+        Log Out
+      </span>
+      <div style={{ marginTop: 50 }}>
+        <h4 style={{ textAlign: 'center', marginBottom: 10 }}>My Tweets</h4>
+        {myTweetObjs.map((tweetObj) => (
+          <Tweet key={tweetObj.createdAt} tweetObj={tweetObj} isOwner={true} />
+        ))}
+      </div>
     </div>
   );
 };
