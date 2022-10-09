@@ -1,5 +1,6 @@
+import { faPen } from '@fortawesome/free-solid-svg-icons';
 import Tweet from 'components/Tweet';
-import { authService, dbService } from 'fbase';
+import { authService, dbService, storageService } from 'fbase';
 import { updateProfile } from 'firebase/auth';
 import {
   collection,
@@ -8,12 +9,15 @@ import {
   query,
   where,
 } from 'firebase/firestore';
+import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 const Profile = ({ refreshUser, userObj }) => {
   const navigate = useNavigate();
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
+  const [newProfilePic, setNewProfilePic] = useState('');
   const [myTweetObjs, setMyTweetObjs] = useState([]);
 
   const onLogOutClick = () => {
@@ -51,17 +55,74 @@ const Profile = ({ refreshUser, userObj }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
+
+    let profilePicURL = '';
+    if (newProfilePic !== '') {
+      const profileRef = ref(storageService, `${userObj.uid}/profile`);
+      const response = await uploadString(
+        profileRef,
+        newProfilePic,
+        'data_url'
+      );
+      profilePicURL = await getDownloadURL(response.ref);
+    }
+
     if (userObj.displayName !== newDisplayName) {
       await updateProfile(authService.currentUser, {
         displayName: newDisplayName,
+        photoURL: profilePicURL,
       });
       refreshUser();
     }
+    setNewProfilePic('');
+  };
+
+  const onFileChange = (e) => {
+    const {
+      target: { files },
+    } = e;
+    const file = files[0];
+    const reader = new FileReader();
+    reader.onloadend = (finishedEvent) => {
+      const {
+        currentTarget: { result },
+      } = finishedEvent;
+      setNewProfilePic(result);
+    };
+    reader.readAsDataURL(file);
   };
 
   return (
     <div className="container">
       <form onSubmit={onSubmit} className="profileForm">
+        {newProfilePic && (
+          <div style={{ width: 60, padding: 10, alignSelf: 'center' }}>
+            <img
+              src={newProfilePic}
+              alt="profile-pic"
+              style={{
+                backgroundImage: newProfilePic,
+              }}
+            />
+          </div>
+        )}
+        <label
+          htmlFor="profile-img"
+          className="factoryInput__label"
+          style={{ textAlign: 'center' }}
+        >
+          <span>Edit Profile Picture</span>
+          <FontAwesomeIcon icon={faPen} />
+        </label>
+        <input
+          id="profile-img"
+          type="file"
+          accept="image/*"
+          onChange={onFileChange}
+          style={{
+            opacity: 0,
+          }}
+        />
         <input
           type="text"
           value={newDisplayName}

@@ -13,7 +13,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
     const ok = window.confirm('Delete this tweet?');
     if (ok) {
       try {
-        console.log(tweetObj);
+        // console.log(tweetObj);
         // 삭제하려는 트윗 firestore에서 삭제
         await deleteDoc(doc(dbService, 'tweets', `${tweetObj.id}`));
         // 삭제하려는 트윗에 이미지 파일 존재하는 경우
@@ -42,6 +42,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
     } = e;
     setNewTweet(value);
   };
+
   return (
     <div>
       {editing ? (

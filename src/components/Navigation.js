@@ -1,10 +1,17 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { authService } from 'fbase';
 
 const Navigation = ({ userObj }) => {
+  const [profilePic, setProfilePic] = useState('');
+  useEffect(() => {
+    const user = authService.currentUser;
+    setProfilePic(user.photoURL);
+  }, [userObj]);
+
   return (
     <nav>
       <ul style={{ display: 'flex', justifyContent: 'center', marginTop: 50 }}>
@@ -24,7 +31,12 @@ const Navigation = ({ userObj }) => {
               fontSize: 12,
             }}
           >
-            <FontAwesomeIcon icon={faUser} color={'#629749'} size="2x" />
+            <img
+              src={profilePic}
+              style={{ height: 30, width: 30 }}
+              alt="profile"
+            />
+            {/* <FontAwesomeIcon icon={faUser} color={'#629749'} size="2x" /> */}
             <span style={{ marginTop: 10 }}>
               {userObj.displayName
                 ? `${userObj.displayName}의 Profile`
