@@ -83,7 +83,7 @@ form {
 .profileTweets {
   display: flex;
   justify-content: space-around;
-  padding-bottom: 10px;
+  padding-bottom: 20px;
 }
 
 .profileTweets h4 {
@@ -91,7 +91,7 @@ form {
 }
 
 .logOut {
-  margin-top: 50px;
+  margin: 30px 0;
 }
 
 /* Twitter Factory */
@@ -221,7 +221,7 @@ form {
 .tweet__actions {
   display: flex;
   justify-content: space-between;
-  padding: 20px 30px 0 0;
+  padding: 10px 30px 0 0;
 }
 
 .tweet__actions span {
