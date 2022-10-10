@@ -1,13 +1,19 @@
-import { dbService, storageService } from 'fbase';
+import { authService, dbService, storageService } from 'fbase';
 import { doc, deleteDoc, updateDoc } from 'firebase/firestore';
 import { ref, deleteObject } from 'firebase/storage';
 import React, { useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faTrash, faPencilAlt } from '@fortawesome/free-solid-svg-icons';
+import {
+  faTrash,
+  faPencilAlt,
+  faRetweet,
+} from '@fortawesome/free-solid-svg-icons';
+import { faComment, faHeart } from '@fortawesome/free-regular-svg-icons';
 
-const Tweet = ({ tweetObj, isOwner }) => {
+const Tweet = ({ tweetObj, isOwner, userObj }) => {
   const [editing, setEditing] = useState(false);
   const [newTweet, setNewTweet] = useState(tweetObj.text);
+  const [likeCnt, setLikeCnt] = useState(tweetObj.likes);
 
   const onDeleteClick = async () => {
     const ok = window.confirm('Delete this tweet?');
@@ -36,11 +42,33 @@ const Tweet = ({ tweetObj, isOwner }) => {
     });
     setEditing(false);
   };
+
   const onChange = (e) => {
     const {
       target: { value },
     } = e;
     setNewTweet(value);
+  };
+
+  const onLikeClick = async (e) => {
+    // 하트 클릭하면 하트 색 바뀌고 옆에 숫자 카운트 + 1
+    // 클릭한 tweetObj에 하트 클릭한 user.uid랑 하트클릭수 저장 - 새로운prop 만들기
+    // 내 페이지에서 tweetObj에 하트 클릭 목록에 내 uid 존재하면 띄우기
+    e.preventDefault();
+    const currentUser = userObj.uid;
+    if (!tweetObj.likedBy.includes(currentUser)) {
+      await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
+        likedBy: [...tweetObj.likedBy, userObj.uid],
+        likes: tweetObj.likes + 1,
+      });
+      setLikeCnt(tweetObj.likes + 1);
+    } else {
+      await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
+        likedBy: tweetObj.likedBy.filter((user) => user !== currentUser),
+        likes: tweetObj.likes - 1,
+      });
+      setLikeCnt(tweetObj.likes - 1);
+    }
   };
 
   return (
@@ -80,7 +108,7 @@ const Tweet = ({ tweetObj, isOwner }) => {
             <img alt={tweetObj.text} src={tweetObj.attachmentURL} />
           )}
           {isOwner && (
-            <div className="tweet__actions">
+            <div className="tweet__edits">
               <span onClick={onDeleteClick}>
                 <FontAwesomeIcon icon={faTrash} />
               </span>
@@ -89,6 +117,20 @@ const Tweet = ({ tweetObj, isOwner }) => {
               </span>
             </div>
           )}
+          <div className="tweet__actions">
+            <span>
+              <FontAwesomeIcon icon={faComment} />
+              <span>1</span>
+            </span>
+            <span>
+              <FontAwesomeIcon icon={faRetweet} />
+              <span>1</span>
+            </span>
+            <span onClick={onLikeClick}>
+              <FontAwesomeIcon icon={faHeart} />
+              <span>{likeCnt}</span>
+            </span>
+          </div>
         </div>
       )}
     </div>

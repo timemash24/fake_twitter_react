@@ -19,32 +19,35 @@ const Profile = ({ refreshUser, userObj }) => {
   const [newDisplayName, setNewDisplayName] = useState(userObj.displayName);
   const [newProfilePic, setNewProfilePic] = useState('');
   const [myTweetObjs, setMyTweetObjs] = useState([]);
+  const [likedTweetObjs, setLikedTweetObjs] = useState([]);
+  const [toggleMyTweets, setToggleMyTweets] = useState(true);
 
   const onLogOutClick = () => {
     authService.signOut();
     navigate('/');
   };
 
-  useEffect(() => {
-    const getMyTweets = async () => {
-      const q = query(
-        collection(dbService, 'tweets'),
-        where('creatorId', '==', userObj.uid),
-        orderBy('createdAt', 'desc')
-      );
+  const getMyTweets = async () => {
+    const q = query(
+      collection(dbService, 'tweets'),
+      where('creatorId', '==', userObj.uid),
+      orderBy('createdAt', 'desc')
+    );
 
-      // 실시간 업데이트
-      let tweetArr = [];
-      onSnapshot(q, (snapshot) => {
-        tweetArr = snapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
-        setMyTweetObjs(tweetArr);
-      });
-    };
+    // 실시간 업데이트
+    let tweetArr = [];
+    onSnapshot(q, (snapshot) => {
+      tweetArr = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setMyTweetObjs(tweetArr);
+    });
+  };
+
+  useEffect(() => {
     getMyTweets();
-  }, [userObj]);
+  }, []);
 
   const onChange = (e) => {
     const {
@@ -55,8 +58,7 @@ const Profile = ({ refreshUser, userObj }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-    console.log('photoURL변경전', userObj.photoURL);
-    // 빈 사진 업로드 막아야함
+
     let profilePicURL = '';
     if (newProfilePic !== '') {
       const profileRef = ref(storageService, `${userObj.uid}/profile`);
@@ -70,20 +72,20 @@ const Profile = ({ refreshUser, userObj }) => {
 
     if (userObj.displayName !== newDisplayName) {
       if (profilePicURL !== '') {
-        console.log('이름 사진 변경');
+        // console.log('이름 사진 변경');
         await updateProfile(authService.currentUser, {
           displayName: newDisplayName,
           photoURL: profilePicURL,
         });
       } else {
-        console.log('이름 변경');
+        // console.log('이름 변경');
         await updateProfile(authService.currentUser, {
           displayName: newDisplayName,
         });
       }
       refreshUser();
     } else if (profilePicURL !== '') {
-      console.log('사진 변경');
+      // console.log('사진 변경');
       await updateProfile(authService.currentUser, {
         photoURL: profilePicURL,
       });
@@ -106,6 +108,34 @@ const Profile = ({ refreshUser, userObj }) => {
       setNewProfilePic(result);
     };
     reader.readAsDataURL(file);
+  };
+
+  const getLikedTweets = async () => {
+    const q = query(
+      collection(dbService, 'tweets'),
+      orderBy('createdAt', 'desc')
+    );
+
+    let tweetArr = [];
+    onSnapshot(q, (snapshot) => {
+      tweetArr = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      setLikedTweetObjs(
+        tweetArr.filter((tweet) => tweet.likedBy.includes(userObj.uid))
+      );
+    });
+  };
+  const onSortClick = (e) => {
+    if (e.target.innerText === 'My Tweets') {
+      setToggleMyTweets(true);
+      getMyTweets();
+    } else if (e.target.innerText === 'Liked Tweets') {
+      setToggleMyTweets(false);
+      getLikedTweets();
+    }
   };
 
   return (
@@ -161,12 +191,33 @@ const Profile = ({ refreshUser, userObj }) => {
       <span onClick={onLogOutClick} className="formBtn cancelBtn logOut">
         Log Out
       </span>
-      <div style={{ marginTop: 50 }}>
-        <h4 style={{ textAlign: 'center', marginBottom: 10 }}>My Tweets</h4>
-        {myTweetObjs.map((tweetObj) => (
-          <Tweet key={tweetObj.createdAt} tweetObj={tweetObj} isOwner={true} />
-        ))}
-      </div>
+      <section style={{ marginTop: 50 }}>
+        <div className="profileTweets" onClick={onSortClick}>
+          <h4 style={{ textAlign: 'center', marginBottom: 10 }} name="my">
+            My Tweets
+          </h4>
+          <h4 style={{ textAlign: 'center', marginBottom: 10 }} name="liked">
+            Liked Tweets
+          </h4>
+        </div>
+        {toggleMyTweets
+          ? myTweetObjs.map((tweetObj) => (
+              <Tweet
+                key={tweetObj.createdAt}
+                tweetObj={tweetObj}
+                isOwner={true}
+                userObj={userObj}
+              />
+            ))
+          : likedTweetObjs.map((tweetObj) => (
+              <Tweet
+                key={tweetObj.createdAt}
+                tweetObj={tweetObj}
+                isOwner={tweetObj.creatorId === userObj.uid}
+                userObj={userObj}
+              />
+            ))}
+      </section>
     </div>
   );
 };
