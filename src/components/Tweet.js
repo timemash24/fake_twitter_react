@@ -7,13 +7,22 @@ import {
   faTrash,
   faPencilAlt,
   faRetweet,
+  faHeart,
 } from '@fortawesome/free-solid-svg-icons';
-import { faComment, faHeart } from '@fortawesome/free-regular-svg-icons';
+import {
+  faComment,
+  faHeart as emptyHeart,
+} from '@fortawesome/free-regular-svg-icons';
 
 const Tweet = ({ tweetObj, isOwner, userObj }) => {
   const [editing, setEditing] = useState(false);
   const [newTweet, setNewTweet] = useState(tweetObj.text);
   const [likeCnt, setLikeCnt] = useState(tweetObj.likes);
+  const [like, setLike] = useState(tweetObj.likedBy.includes(userObj.uid));
+  const [retweetCnt, setRetweetCnt] = useState(tweetObj.retweets);
+  const [retweet, setRetweet] = useState(
+    tweetObj.retweetedBy.includes(userObj.uid)
+  );
 
   const onDeleteClick = async () => {
     const ok = window.confirm('Delete this tweet?');
@@ -50,24 +59,47 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
     setNewTweet(value);
   };
 
-  const onLikeClick = async (e) => {
-    // 하트 클릭하면 하트 색 바뀌고 옆에 숫자 카운트 + 1
-    // 클릭한 tweetObj에 하트 클릭한 user.uid랑 하트클릭수 저장 - 새로운prop 만들기
-    // 내 페이지에서 tweetObj에 하트 클릭 목록에 내 uid 존재하면 띄우기
-    e.preventDefault();
+  const onLikeClick = async () => {
     const currentUser = userObj.uid;
     if (!tweetObj.likedBy.includes(currentUser)) {
       await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
         likedBy: [...tweetObj.likedBy, userObj.uid],
         likes: tweetObj.likes + 1,
       });
+      setLike(true);
       setLikeCnt(tweetObj.likes + 1);
     } else {
       await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
         likedBy: tweetObj.likedBy.filter((user) => user !== currentUser),
         likes: tweetObj.likes - 1,
       });
+      setLike(false);
       setLikeCnt(tweetObj.likes - 1);
+    }
+  };
+
+  const onRetweetClick = async () => {
+    // 리트윗 누르면 리트윗 카운트 + 1 하면서 색상 초록으로 변경, 다시 누르면 - 1
+    // 리트윗한 트윗은 profile 페이지 my tweets 에서 보여줘야 함
+    // tweetObj에 prop 추가 - retweets 리트윗 수, retweetedBy 리트윗한 유저 배열
+    // retweetedBy에 내 uid 있으면 my tweets에 보여주는 조건 추가
+    const currentUser = userObj.uid;
+    if (!tweetObj.retweetedBy.includes(currentUser)) {
+      await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
+        retweetedBy: [...tweetObj.retweetedBy, userObj.uid],
+        retweets: tweetObj.retweets + 1,
+      });
+      setRetweet(true);
+      setRetweetCnt(tweetObj.retweets + 1);
+    } else {
+      await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
+        retweetedBy: tweetObj.retweetedBy.filter(
+          (user) => user !== currentUser
+        ),
+        retweets: tweetObj.retweets - 1,
+      });
+      setRetweet(false);
+      setRetweetCnt(tweetObj.retweets - 1);
     }
   };
 
@@ -102,34 +134,56 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
           </span>
         </div>
       ) : (
-        <div className="tweet">
-          <h4>{tweetObj.text}</h4>
-          {tweetObj.attachmentURL && (
-            <img alt={tweetObj.text} src={tweetObj.attachmentURL} />
-          )}
-          {isOwner && (
-            <div className="tweet__edits">
-              <span onClick={onDeleteClick}>
-                <FontAwesomeIcon icon={faTrash} />
-              </span>
-              <span onClick={toggleEditing}>
-                <FontAwesomeIcon icon={faPencilAlt} />
-              </span>
-            </div>
-          )}
-          <div className="tweet__actions">
-            <span>
-              <FontAwesomeIcon icon={faComment} />
-              <span>1</span>
-            </span>
+        <div>
+          {retweet ? (
             <span>
               <FontAwesomeIcon icon={faRetweet} />
-              <span>1</span>
+              You Retweeted
             </span>
-            <span onClick={onLikeClick}>
-              <FontAwesomeIcon icon={faHeart} />
-              <span>{likeCnt}</span>
-            </span>
+          ) : null}
+          <div className="tweet">
+            <h4>{tweetObj.text}</h4>
+            {tweetObj.attachmentURL && (
+              <img alt={tweetObj.text} src={tweetObj.attachmentURL} />
+            )}
+            {isOwner && (
+              <div className="tweet__edits">
+                <span onClick={onDeleteClick}>
+                  <FontAwesomeIcon icon={faTrash} />
+                </span>
+                <span onClick={toggleEditing}>
+                  <FontAwesomeIcon icon={faPencilAlt} />
+                </span>
+              </div>
+            )}
+            <div className="tweet__actions">
+              <span>
+                <FontAwesomeIcon icon={faComment} />
+                <span>1</span>
+              </span>
+              <span onClick={onRetweetClick}>
+                {retweet ? (
+                  <FontAwesomeIcon
+                    icon={faRetweet}
+                    style={{ color: '#629749' }}
+                  />
+                ) : (
+                  <FontAwesomeIcon icon={faRetweet} />
+                )}
+                <span>{retweetCnt}</span>
+              </span>
+              <span onClick={onLikeClick}>
+                {like ? (
+                  <FontAwesomeIcon
+                    icon={faHeart}
+                    style={{ color: 'indianred' }}
+                  />
+                ) : (
+                  <FontAwesomeIcon icon={emptyHeart} />
+                )}
+                <span>{likeCnt}</span>
+              </span>
+            </div>
           </div>
         </div>
       )}

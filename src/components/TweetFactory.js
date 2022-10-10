@@ -31,8 +31,10 @@ function TweetFactory({ userObj }) {
       createdAt: Date.now(),
       creatorId: userObj.uid,
       attachmentURL,
-      likedBy: ['admin'],
+      likedBy: [],
       likes: 0,
+      retweetedBy: [],
+      retweets: 0,
     };
 
     await addDoc(collection(dbService, 'tweets'), twt);
