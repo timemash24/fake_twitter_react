@@ -35,7 +35,7 @@ const Navigation = ({ userObj }) => {
           >
             <img
               src={profilePic}
-              style={{ height: 30, width: 30 }}
+              style={{ height: 30, width: 30, borderRadius: 50 }}
               alt="profile"
             />
             {/* <FontAwesomeIcon icon={faUser} color={'#629749'} size="2x" /> */}
