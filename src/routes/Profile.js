@@ -27,10 +27,10 @@ const Profile = ({ refreshUser, userObj }) => {
     navigate('/');
   };
 
+  // 리트윗 + 내가 작성한 트윗 가져오기
   const getMyTweets = async () => {
     const q = query(
       collection(dbService, 'tweets'),
-      where('creatorId', '==', userObj.uid),
       orderBy('createdAt', 'desc')
     );
 
@@ -41,7 +41,14 @@ const Profile = ({ refreshUser, userObj }) => {
         id: doc.id,
         ...doc.data(),
       }));
-      setMyTweetObjs(tweetArr);
+      // 리트윗한 시간도 저장해서 순서 정렬 필요
+      setMyTweetObjs(
+        tweetArr.filter(
+          (tweet) =>
+            tweet.creatorId === userObj.uid ||
+            tweet.retweetedBy.includes(userObj.uid)
+        )
+      );
     });
   };
 
@@ -128,6 +135,7 @@ const Profile = ({ refreshUser, userObj }) => {
       );
     });
   };
+
   const onSortClick = (e) => {
     if (e.target.innerText === 'My Tweets') {
       setToggleMyTweets(true);
@@ -191,7 +199,7 @@ const Profile = ({ refreshUser, userObj }) => {
       <span onClick={onLogOutClick} className="formBtn cancelBtn logOut">
         Log Out
       </span>
-      <section style={{ marginTop: 50 }}>
+      <section style={{ marginTop: 20 }}>
         <div className="profileTweets" onClick={onSortClick}>
           <h4 style={{ textAlign: 'center', marginBottom: 10 }} name="my">
             My Tweets
@@ -205,7 +213,7 @@ const Profile = ({ refreshUser, userObj }) => {
               <Tweet
                 key={tweetObj.createdAt}
                 tweetObj={tweetObj}
-                isOwner={true}
+                isOwner={tweetObj.creatorId === userObj.uid}
                 userObj={userObj}
               />
             ))
