@@ -4,12 +4,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTwitter } from '@fortawesome/free-brands-svg-icons';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { authService } from 'fbase';
+const profileImg = require('img/profile.png');
 
 const Navigation = ({ userObj }) => {
-  const [profilePic, setProfilePic] = useState('');
+  const [profilePic, setProfilePic] = useState(profileImg);
   useEffect(() => {
     const user = authService.currentUser;
-    setProfilePic(user.photoURL);
+    console.log(userObj.photoURL);
+    setProfilePic(userObj.photoURL);
   }, [userObj]);
 
   return (

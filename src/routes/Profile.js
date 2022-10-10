@@ -55,7 +55,8 @@ const Profile = ({ refreshUser, userObj }) => {
 
   const onSubmit = async (e) => {
     e.preventDefault();
-
+    console.log('photoURL변경전', userObj.photoURL);
+    // 빈 사진 업로드 막아야함
     let profilePicURL = '';
     if (newProfilePic !== '') {
       const profileRef = ref(storageService, `${userObj.uid}/profile`);
@@ -68,12 +69,27 @@ const Profile = ({ refreshUser, userObj }) => {
     }
 
     if (userObj.displayName !== newDisplayName) {
+      if (profilePicURL !== '') {
+        console.log('이름 사진 변경');
+        await updateProfile(authService.currentUser, {
+          displayName: newDisplayName,
+          photoURL: profilePicURL,
+        });
+      } else {
+        console.log('이름 변경');
+        await updateProfile(authService.currentUser, {
+          displayName: newDisplayName,
+        });
+      }
+      refreshUser();
+    } else if (profilePicURL !== '') {
+      console.log('사진 변경');
       await updateProfile(authService.currentUser, {
-        displayName: newDisplayName,
         photoURL: profilePicURL,
       });
       refreshUser();
     }
+
     setNewProfilePic('');
   };
 
@@ -96,11 +112,13 @@ const Profile = ({ refreshUser, userObj }) => {
     <div className="container">
       <form onSubmit={onSubmit} className="profileForm">
         {newProfilePic && (
-          <div style={{ width: 60, padding: 10, alignSelf: 'center' }}>
+          <div style={{ alignSelf: 'center' }}>
             <img
               src={newProfilePic}
               alt="profile-pic"
               style={{
+                width: 60,
+                padding: 10,
                 backgroundImage: newProfilePic,
               }}
             />
