@@ -42,6 +42,8 @@ const Profile = ({ refreshUser, userObj }) => {
         ...doc.data(),
       }));
       // 리트윗한 시간도 저장해서 순서 정렬 필요
+      // tweeterObj의 retweetedBy porp 변경 - [{user: userObj.uid, retweetedAt: Date.now()}]
+      // retweetedBy.retweetedAt과 reweetedAt에 내 아이디 없으면 createdAt으로 비교 정렬
       setMyTweetObjs(
         tweetArr.filter(
           (tweet) =>

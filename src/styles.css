@@ -94,7 +94,7 @@ form {
   margin: 30px 0;
 }
 
-/* Twitter Factory */
+/* Tweet Factory */
 
 .factoryForm {
   display: flex;
@@ -190,6 +190,10 @@ form {
   color: rgba(0, 0, 0, 0.8);
 }
 
+.selected {
+  background-color: #d7ccc8;
+}
+
 .tweet h4 {
   font-size: 14px;
 }
@@ -231,6 +235,17 @@ form {
 
 .tweet__actions span span {
   padding-left: 5px;
+}
+
+/* Reply */
+.replyContainer {
+  width: 100%;
+  max-width: 320px;
+  margin-bottom: 20px;
+  padding-left: 10px;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px dashed rgba(255, 255, 255, 0.9);
 }
 
 /* Auth */

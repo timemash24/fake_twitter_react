@@ -1,14 +1,22 @@
 import { dbService, storageService } from 'fbase';
-import { addDoc, collection } from 'firebase/firestore';
+import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-function TweetFactory({ userObj }) {
+function TweetFactory({ userObj, replyTo }) {
   const [tweet, setTweet] = useState('');
   const [attachment, setAttachment] = useState('');
+
+  const addReplyCnt = async () => {
+    if (replyTo) {
+      await updateDoc(doc(dbService, 'tweets', `${replyTo.id}`), {
+        replies: replyTo.replies + 1,
+      });
+    }
+  };
 
   const onSubmit = async (e) => {
     if (tweet === '') return;
@@ -35,9 +43,12 @@ function TweetFactory({ userObj }) {
       likes: 0,
       retweetedBy: [],
       retweets: 0,
+      replies: 0,
+      replyTo: replyTo ? replyTo : null,
     };
 
     await addDoc(collection(dbService, 'tweets'), twt);
+    addReplyCnt();
     setTweet('');
     setAttachment('');
   };
@@ -65,6 +76,7 @@ function TweetFactory({ userObj }) {
   };
 
   const onClearAttachment = () => setAttachment('');
+
   return (
     <form onSubmit={onSubmit} className="factoryForm">
       <div className="factoryInput__container">
