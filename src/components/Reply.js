@@ -17,7 +17,7 @@ const Reply = ({ userObj, tweetId }) => {
     // 실시간 업데이트
     onSnapshot(q, (snapshot) => {
       const tweetArr = snapshot.docs.map((doc) => ({
-        // id: doc.id,
+        id: doc.id,
         ...doc.data(),
       }));
       const replyArr = tweetArr.filter((tweet) => tweet.replyTo === tweetId);
