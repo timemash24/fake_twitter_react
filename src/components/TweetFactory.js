@@ -39,6 +39,8 @@ function TweetFactory({ userObj, replyTo }) {
       text: tweet,
       createdAt: Date.now(),
       creatorId: userObj.uid,
+      creatorName: userObj.displayName,
+      creatorPicURL: userObj.photoURL,
       attachmentURL,
       likedBy: [],
       likes: 0,

@@ -19,9 +19,15 @@ const Home = ({ userObj }) => {
         id: doc.id,
         ...doc.data(),
       }));
+      for (const tweet of tweetArr) {
+        if (tweet.creatorId === userObj.uid) {
+          tweet.creatorPicURL = userObj.photoURL;
+          tweet.creatorName = userObj.displayName;
+        }
+      }
       setTweets(tweetArr);
     });
-  }, []);
+  }, [userObj]);
 
   return (
     <div className="container">

@@ -26,6 +26,7 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
   );
   const [reply, setReply] = useState(false);
   const [replyCnt, setReplyCnt] = useState(tweetObj.replies);
+  const [creatorPic, setCreatorPic] = useState(tweetObj.creatorPicURL);
 
   const onDeleteClick = async () => {
     const ok = window.confirm('Delete this tweet?');
@@ -127,9 +128,23 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
     setReply(!reply);
   };
 
+  // const getCreatorImg = async () => {
+  //   const profileRef = ref(storageService, `${tweetObj.creatorId}/profile`);
+  //     const response = await uploadString(
+  //       profileRef,
+  //       tweetIbj,
+  //       'data_url'
+  //     );
+  //     profilePicURL = await getDownloadURL(response.ref);
+  // }
+
   useEffect(() => {
     setReplyCnt(tweetObj.replies);
   }, [tweetObj.replies]);
+
+  // useEffect(() => {
+
+  // }, [userObj])
 
   return (
     <div>
@@ -169,7 +184,12 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
               You Retweeted
             </span>
           ) : null}
+
           <div className={reply ? 'tweet selected' : 'tweet'}>
+            <div className="tweetCreator">
+              <img src={tweetObj.creatorPicURL} alt="user-profile" />
+              <span>{tweetObj.creatorName}</span>
+            </div>
             {tweetObj.replyTo ? (
               <div style={{ marginBottom: 5, color: '#6d6d6d' }}>
                 Replying to{' '}

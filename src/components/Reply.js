@@ -21,25 +21,36 @@ const Reply = ({ userObj, tweetId }) => {
         ...doc.data(),
       }));
       const replyArr = tweetArr.filter((tweet) => tweet.replyTo === tweetId);
-
+      for (const tweet of replyArr) {
+        if (tweet.creatorId === userObj.uid) {
+          tweet.creatorPicURL = userObj.photoURL;
+          tweet.creatorName = userObj.displayName;
+        }
+      }
       setTweets([...replyArr]);
     });
   }, []);
 
   return (
-    <div className="replyContainer">
-      <p style={{ textAlign: 'center', paddingBottom: 5 }}>Replying...</p>
-      <TweetFactory userObj={userObj} replyTo={tweetId} />
+    <div
+      style={{
+        borderLeft: '1px solid rgba(255, 255, 255, 0.7)',
+      }}
+    >
+      <div className="replyContainer">
+        <p style={{ textAlign: 'center', paddingBottom: 5 }}>Replying...</p>
+        <TweetFactory userObj={userObj} replyTo={tweetId} />
 
-      <div style={{ marginTop: 30 }}>
-        {tweets?.map((twt, i) => (
-          <Tweet
-            key={`${twt.replyTo}${i}`}
-            tweetObj={twt}
-            userObj={userObj}
-            isOwner={twt.creatorId === userObj.uid}
-          />
-        ))}
+        <div style={{ marginTop: 30 }}>
+          {tweets?.map((twt, i) => (
+            <Tweet
+              key={`${twt.replyTo}${i}`}
+              tweetObj={twt}
+              userObj={userObj}
+              isOwner={twt.creatorId === userObj.uid}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

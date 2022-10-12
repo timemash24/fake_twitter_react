@@ -171,6 +171,27 @@ form {
 
 /* Tweet */
 
+.tweetCreator {
+  display: flex;
+  height: 20px;
+}
+
+.tweetCreator img {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  border-radius: 50%;
+  width: 20px;
+  height: 20px;
+}
+
+.tweetCreator span {
+  position: absolute;
+  top: 12px;
+  left: 30px;
+  font-weight: bold;
+}
+
 .tweetEdit .formBtn {
   cursor: pointer;
   margin-top: 15px;
@@ -198,7 +219,7 @@ form {
   font-size: 14px;
 }
 
-.tweet img {
+.tweet > img {
   right: -25px;
   top: 10px;
   position: absolute;
@@ -245,7 +266,6 @@ form {
   padding-left: 10px;
   display: flex;
   flex-direction: column;
-  border-left: 1px dashed rgba(255, 255, 255, 0.9);
 }
 
 /* Auth */
