@@ -20,7 +20,9 @@ const Reply = ({ userObj, tweetId }) => {
         id: doc.id,
         ...doc.data(),
       }));
-      const replyArr = tweetArr.filter((tweet) => tweet.replyTo === tweetId);
+      const replyArr = tweetArr.filter(
+        (tweet) => tweet.tweetIdReplyTo === tweetId
+      );
       for (const tweet of replyArr) {
         if (tweet.creatorId === userObj.uid) {
           tweet.creatorPicURL = userObj.photoURL;
@@ -39,12 +41,12 @@ const Reply = ({ userObj, tweetId }) => {
     >
       <div className="replyContainer">
         <p style={{ textAlign: 'center', paddingBottom: 5 }}>Replying...</p>
-        <TweetFactory userObj={userObj} replyTo={tweetId} />
+        <TweetFactory userObj={userObj} tweetIdReplyTo={tweetId} />
 
         <div style={{ marginTop: 30 }}>
           {tweets?.map((twt, i) => (
             <Tweet
-              key={`${twt.replyTo}${i}`}
+              key={`${twt.tweetIdReplyTo}${i}`}
               tweetObj={twt}
               userObj={userObj}
               isOwner={twt.creatorId === userObj.uid}

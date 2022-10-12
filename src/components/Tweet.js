@@ -32,17 +32,20 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
     const ok = window.confirm('Delete this tweet?');
     if (ok) {
       try {
-        // const replyObj = tweetObj.replyTo;
-        console.log(tweetObj.replyTo);
-        if (tweetObj.replyTo) {
+        // const replyObj = tweetObj.tweetIdReplyTo;
+        console.log(tweetObj.tweetIdReplyTo);
+        if (tweetObj.tweetIdReplyTo) {
           const docSnap = await getDoc(
-            doc(dbService, 'tweets', `${tweetObj.replyTo}`)
+            doc(dbService, 'tweets', `${tweetObj.tweetIdReplyTo}`)
           );
           if (docSnap.data()) {
             setReplyCnt(docSnap.data().replies - 1);
-            await updateDoc(doc(dbService, 'tweets', `${tweetObj.replyTo}`), {
-              replies: docSnap.data().replies - 1,
-            });
+            await updateDoc(
+              doc(dbService, 'tweets', `${tweetObj.tweetIdReplyTo}`),
+              {
+                replies: docSnap.data().replies - 1,
+              }
+            );
           } else {
             window.alert('The original tweet you replied was deleted.');
           }
@@ -123,7 +126,7 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
     // 아래에 새로운 입력창과 띄우고 달린 답글 트윗 모두 보여주기
     // 답글 트윗은 @답글단트윗id 표시
     // 답글 카운트 수 + 1 이후 과정은 새로운 트윗 추가랑 같음
-    // tweeterObj에 prop추가 - replies 답글 수, replyTo 이 트윗이 답글이면 답글 한 원트윗 id
+    // tweeterObj에 prop추가 - replies 답글 수, tweetIdReplyTo 이 트윗이 답글이면 답글 한 원트윗 id
     // 내가 답글로 단 트윗은 profile 페이지 my tweets에 보여짐
     setReply(!reply);
   };
@@ -190,11 +193,11 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
               <img src={tweetObj.creatorPicURL} alt="user-profile" />
               <span>{tweetObj.creatorName}</span>
             </div>
-            {tweetObj.replyTo ? (
+            {tweetObj.tweetIdReplyTo ? (
               <div style={{ marginBottom: 5, color: '#6d6d6d' }}>
                 Replying to{' '}
                 <span style={{ color: '#33691e', fontWeight: 'bold' }}>
-                  @{tweetObj.replyTo}
+                  @{tweetObj.usernameReplyTo}
                 </span>
               </div>
             ) : null}

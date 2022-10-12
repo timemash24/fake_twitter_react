@@ -31,7 +31,7 @@ const Home = ({ userObj }) => {
 
   return (
     <div className="container">
-      <TweetFactory userObj={userObj} replyTo="" />
+      <TweetFactory userObj={userObj} tweetIdReplyTo="" />
       <div style={{ marginTop: 30 }}>
         {tweets.map((twt) => (
           <Tweet

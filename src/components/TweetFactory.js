@@ -6,14 +6,16 @@ import { v4 as uuidv4 } from 'uuid';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faPlus, faTimes } from '@fortawesome/free-solid-svg-icons';
 
-function TweetFactory({ userObj, replyTo }) {
+function TweetFactory({ userObj, tweetIdReplyTo }) {
   const [tweet, setTweet] = useState('');
   const [attachment, setAttachment] = useState('');
 
   const addReplyCnt = async () => {
-    if (replyTo) {
-      const docSnap = await getDoc(doc(dbService, 'tweets', `${replyTo}`));
-      await updateDoc(doc(dbService, 'tweets', `${replyTo}`), {
+    if (tweetIdReplyTo) {
+      const docSnap = await getDoc(
+        doc(dbService, 'tweets', `${tweetIdReplyTo}`)
+      );
+      await updateDoc(doc(dbService, 'tweets', `${tweetIdReplyTo}`), {
         replies: docSnap.data().replies + 1,
       });
     }
@@ -35,6 +37,14 @@ function TweetFactory({ userObj, replyTo }) {
       attachmentURL = await getDownloadURL(response.ref);
     }
 
+    let username = null;
+    if (tweetIdReplyTo) {
+      const docSnap = await getDoc(
+        doc(dbService, 'tweets', `${tweetIdReplyTo}`)
+      );
+      username = docSnap.data().creatorName;
+    }
+
     const twt = {
       text: tweet,
       createdAt: Date.now(),
@@ -47,7 +57,8 @@ function TweetFactory({ userObj, replyTo }) {
       retweetedBy: [],
       retweets: 0,
       replies: 0,
-      replyTo: replyTo ? replyTo : null,
+      tweetIdReplyTo: tweetIdReplyTo ? tweetIdReplyTo : null,
+      usernameReplyTo: username ? username : null,
     };
 
     await addDoc(collection(dbService, 'tweets'), twt);
