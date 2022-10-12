@@ -1,5 +1,5 @@
 import { dbService, storageService } from 'fbase';
-import { addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { addDoc, collection, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadString } from 'firebase/storage';
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
@@ -12,8 +12,9 @@ function TweetFactory({ userObj, replyTo }) {
 
   const addReplyCnt = async () => {
     if (replyTo) {
-      await updateDoc(doc(dbService, 'tweets', `${replyTo.id}`), {
-        replies: replyTo.replies + 1,
+      const docSnap = await getDoc(doc(dbService, 'tweets', `${replyTo}`));
+      await updateDoc(doc(dbService, 'tweets', `${replyTo}`), {
+        replies: docSnap.data().replies + 1,
       });
     }
   };

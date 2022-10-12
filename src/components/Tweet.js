@@ -1,27 +1,18 @@
-import { authService, dbService, storageService } from 'fbase';
-import {
-  doc,
-  deleteDoc,
-  updateDoc,
-  query,
-  collection,
-  orderBy,
-  where,
-  onSnapshot,
-} from 'firebase/firestore';
-import { ref, deleteObject } from 'firebase/storage';
-import React, { useEffect, useState } from 'react';
-import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import {
-  faTrash,
-  faPencilAlt,
-  faRetweet,
-  faHeart,
-} from '@fortawesome/free-solid-svg-icons';
 import {
   faComment,
   faHeart as emptyHeart,
 } from '@fortawesome/free-regular-svg-icons';
+import {
+  faHeart,
+  faPencilAlt,
+  faRetweet,
+  faTrash,
+} from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { dbService, storageService } from 'fbase';
+import { deleteDoc, doc, getDoc, updateDoc } from 'firebase/firestore';
+import { deleteObject, ref } from 'firebase/storage';
+import { useEffect, useState } from 'react';
 import Reply from './Reply';
 
 const Tweet = ({ tweetObj, isOwner, userObj }) => {
@@ -34,20 +25,27 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
     tweetObj.retweetedBy.includes(userObj.uid)
   );
   const [reply, setReply] = useState(false);
-  const [replyCnt, setReplyCnt] = useState(0);
+  const [replyCnt, setReplyCnt] = useState(tweetObj.replies);
 
   const onDeleteClick = async () => {
     const ok = window.confirm('Delete this tweet?');
     if (ok) {
       try {
-        console.log(tweetObj);
         // const replyObj = tweetObj.replyTo;
-        // if (replyObj && doc(dbService, 'tweets', `${replyObj.id}`)) {
-        //   await updateDoc(doc(dbService, 'tweets', `${replyObj.id}`), {
-        //     replies: replyObj.replies,
-        //   });
-        //   // setReplyCnt(replyObj.replies);
-        // }
+        console.log(tweetObj.replyTo);
+        if (tweetObj.replyTo) {
+          const docSnap = await getDoc(
+            doc(dbService, 'tweets', `${tweetObj.replyTo}`)
+          );
+          if (docSnap.data()) {
+            setReplyCnt(docSnap.data().replies - 1);
+            await updateDoc(doc(dbService, 'tweets', `${tweetObj.replyTo}`), {
+              replies: docSnap.data().replies - 1,
+            });
+          } else {
+            window.alert('The original tweet you replied was deleted.');
+          }
+        }
         // 삭제하려는 트윗 firestore에서 삭제
         await deleteDoc(doc(dbService, 'tweets', `${tweetObj.id}`));
         // 삭제하려는 트윗에 이미지 파일 존재하는 경우
@@ -99,10 +97,6 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
   };
 
   const onRetweetClick = async () => {
-    // 리트윗 누르면 리트윗 카운트 + 1 하면서 색상 초록으로 변경, 다시 누르면 - 1
-    // 리트윗한 트윗은 profile 페이지 my tweets 에서 보여줘야 함
-    // tweetObj에 prop 추가 - retweets 리트윗 수, retweetedBy 리트윗한 유저 배열
-    // retweetedBy에 내 uid 있으면 my tweets에 보여주는 조건 추가
     const currentUser = userObj.uid;
     if (!tweetObj.retweetedBy.includes(currentUser)) {
       await updateDoc(doc(dbService, 'tweets', `${tweetObj.id}`), {
@@ -124,31 +118,16 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
   };
 
   const onReplyClick = async () => {
-    // 답글 이모티콘 클릭시 원글과 이에 달린 답글 모두 보여주는 페이지로 이동
-    // 동시에 새로운 tweet 입력 창 띄우는데 앞에 @답글달트윗유저의displayname 고정
-    // 이후 과정은 새로운 트윗 추가랑 같지만 답글은 모두보기에 포함 안시킴? 포함시킴?
-    // tweeterObj에 prop추가 - replies 답글 수, repliedTweets 답글로 단 트윗 id 배열,
-    // replyTo 이 트윗이 답글이면 답글 한 원트윗 obj
+    // 답글 이모티콘 클릭시 원글 색 변경
+    // 아래에 새로운 입력창과 띄우고 달린 답글 트윗 모두 보여주기
+    // 답글 트윗은 @답글단트윗id 표시
+    // 답글 카운트 수 + 1 이후 과정은 새로운 트윗 추가랑 같음
+    // tweeterObj에 prop추가 - replies 답글 수, replyTo 이 트윗이 답글이면 답글 한 원트윗 id
     // 내가 답글로 단 트윗은 profile 페이지 my tweets에 보여짐
     setReply(!reply);
-
-    // setReplyCnt(tweetObj.replies);
   };
 
   useEffect(() => {
-    // const q = query(
-    //   collection(dbService, 'tweets'),
-    //   where('id', '==', 'tweetObj.replyTo.id'),
-    //   orderBy('createdAt', 'desc')
-    // );
-    // let cnt = 0;
-    // onSnapshot(q, (snapshot) => {
-    //   const tweetArr = snapshot.docs.map((doc) => ({
-    //     ...doc.data(),
-    //   }));
-    //   console.log(tweetArr.length);
-    //   setReplyCnt(tweetObj.replies);
-    // });
     setReplyCnt(tweetObj.replies);
   }, [tweetObj.replies]);
 
@@ -195,7 +174,7 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
               <div style={{ marginBottom: 5, color: '#6d6d6d' }}>
                 Replying to{' '}
                 <span style={{ color: '#33691e', fontWeight: 'bold' }}>
-                  @{tweetObj.replyTo.creatorId}
+                  @{tweetObj.replyTo}
                 </span>
               </div>
             ) : null}
@@ -241,7 +220,7 @@ const Tweet = ({ tweetObj, isOwner, userObj }) => {
               </span>
             </div>
           </div>
-          {reply ? <Reply userObj={userObj} tweetObj={tweetObj} /> : null}
+          {reply ? <Reply userObj={userObj} tweetId={tweetObj.id} /> : null}
         </>
       )}
     </div>
