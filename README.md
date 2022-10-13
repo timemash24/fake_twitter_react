@@ -2,7 +2,7 @@
 Demo Site 🔗 https://timemash24.github.io/fake_twitter_react/
 
 ## 사용스택
-<img src="https://img.shields.io/badge/Firebase 9.10.0-FFCA28?style=flat-square&logo=firebase&logoColor=white"/>
+<img src="https://img.shields.io/badge/Firebase 9.10.0-babdbe?style=flat-square&logo=firebase&logoColor=FFCA28"/>
 firebase 9.10.0
 
 ## 기능 설명
